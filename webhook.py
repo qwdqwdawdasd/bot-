@@ -1,18 +1,25 @@
 from flask import Flask, request
+import json
 
 app = Flask(__name__)
 
 @app.route('/webhook', methods=['POST'])
 def webhook():
-    data = request.get_json()
-    print(f"âś”ď¸Ź Otrzymano dane: {data}")
+    # najpierw spróbuj JSON, a jak nie pójdzie, parsuj ręcznie
+    data = request.get_json(silent=True)
+    if data is None:
+        try:
+            data = json.loads(request.data.decode('utf-8'))
+        except:
+            data = {"raw": request.data.decode('utf-8')}
 
-    alert = data.get("alert")
-    symbol = data.get("symbol")
-    print(f"âžˇď¸Ź ALERT: {alert}, SYMBOL: {symbol}")
+    print(f"✔️ Otrzymano dane: {data}")
 
-    # ZAPIS DO PLIKU (opcjonalnie)
-    with open("sygnal.txt", "w") as f:
+    alert = data.get("alert", data.get("raw"))
+    symbol = data.get("symbol", "")
+    print(f"➡️ ALERT: {alert}, SYMBOL: {symbol}")
+
+    with open("sygnal.txt", "w", encoding="utf-8") as f:
         f.write(f"{alert},{symbol}")
 
     return '', 200

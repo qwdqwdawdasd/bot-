@@ -5,7 +5,6 @@ app = Flask(__name__)
 
 @app.route('/webhook', methods=['POST'])
 def webhook():
-    # najpierw spróbuj JSON, a jak nie pójdzie, parsuj ręcznie
     data = request.get_json(silent=True)
     if data is None:
         try:
@@ -15,12 +14,14 @@ def webhook():
 
     print(f"✔️ Otrzymano dane: {data}")
 
-    alert = data.get("alert", data.get("raw"))
+    # KLUCZOWA ZMIANA — dopasuj do PineScript JSON
+    event = data.get("event", data.get("raw"))
     symbol = data.get("symbol", "")
-    print(f"➡️ ALERT: {alert}, SYMBOL: {symbol}")
 
-    with open("sygnal.txt", "w", encoding="utf-8") as f:
-        f.write(f"{alert},{symbol}")
+    print(f"➡️ EVENT: {event}, SYMBOL: {symbol}")
+
+    with open("/tmp/sygnal.txt", "w", encoding="utf-8") as f:
+        f.write(f"{event},{symbol}")
 
     return '', 200
 

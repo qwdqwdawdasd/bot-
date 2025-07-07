@@ -1,5 +1,6 @@
 from flask import Flask, request
 import json
+import os
 
 app = Flask(__name__)
 
@@ -14,7 +15,6 @@ def webhook():
 
     print(f"✔️ Otrzymano dane: {data}")
 
-    # KLUCZOWA ZMIANA — dopasuj do PineScript JSON
     event = data.get("event", data.get("raw"))
     symbol = data.get("symbol", "")
 
@@ -26,4 +26,5 @@ def webhook():
     return '', 200
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port)
